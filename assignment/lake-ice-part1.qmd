@@ -1,6 +1,6 @@
 ---
 title: "Lake Ice Phenology: Part 1"
-author: 'YOUR NAME'
+author: 'Jackson'
 format:
   html:
     embed-resources: true
@@ -25,13 +25,17 @@ file_name <- file.path(here(),"data/lake_ice_off_data.xlsx")
 Now use `read_excel()` to read in `file_name`. Remember that Excel files can have multiple sheets.
 
 ```{r}
+library(tidyverse)
 library(readxl)
 
+ice <- read_excel(file_name, sheet=2)
 ```
 
 Now, look at a preview of the data using the `head()` function. The `doy` in `ice_off_doy` stands for "day of the year" and is the day within the year where ice off occurred (January 1 = doy 1).  `did_not_freeze` is a column where 1 = did not freeze and 0 = did freeze.
 
 ```{r}
+head(ice)
+
 
 ```
 
