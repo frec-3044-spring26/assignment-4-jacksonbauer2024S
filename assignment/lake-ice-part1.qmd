@@ -196,6 +196,14 @@ Based on the `summary()` above, what is the p-value for the slope?
 
 **Answer 7:**
 
+```{r}
+summary(fit)
+```
+
+Our p-value is 2.5e-09 or 0.0000000025. 
+
+
+
 ## The slope physically meaningful
 
 A slope value could have a low probability of being 0 (thus we have a strong belief that it is not zero), but the magnitude of change is functionally meaningless in the physical world (i.e., the rate of change is so small that we would not think much of it). This can occur particularly when analyzing large datasets.
@@ -206,6 +214,9 @@ Based on the slope value, how many more years are needed to pass before the lake
 
 **Answer 8:**
 
+The slope is -0.106 which means the ice off day of year decreases by about 0.106 days per year. Therefore, it would take approximately 67 years for the ice off day to have a one week change. This is meaningful because the average person is not concerned about a -0.106 day change for each year. People respond to and understand standard time periods, like a week, more than just percentages of a day. 
+
+
 ## Overall model assessment
 
 **Question 9:**
@@ -214,11 +225,20 @@ How comfortable are you proceeding with using this linear model for additional a
 
 **Answer 9:**
 
+With alpha=0.05, our p-value of 2.5e-9 is statistically significant. So we are certain this relationship does exist, however the R squared value of 0.205 means only 20.5% of the variation in the ice off day can be explained by the year. This means there are more unknown variables causing the other 79.5% of variation in ice off day. In ecology, a low R squared is always expected because the Earth is a very complex system that we can't fully model so I am comfortable using this model for additional analysis as long as the limitations are understood. 
+
+
+
 **Question 10:**
 Now plot the data for Lake Sunapee (just like above - year on x-axis vs. ice of doy on y axis) but add the line from your regression results (e.g., fit intercept and slope). You will use the [`geom_abline`](https://ggplot2.tidyverse.org/reference/geom_abline.html). 
 
 **Answer 10:**
 ```{r}
+ggplot(sunapee, aes(x=year, y=ice_off_doy)) +
+  geom_point() +
+  geom_line() +
+  geom_abline(intercept = fit$coefficients[1], slope = fit$coefficients[2]) +
+  labs(title='Lake Sunapee Ice Off Day Over Time', x='Year', y='Ice Off Day')
 
 ```
 
