@@ -46,7 +46,9 @@ There should be four columns and \~2703 rows.
 We will practice key skills in the module using a focal lake. Use the `filter` function to filter the more extensive data to only contain the data from Lake Sunapee, a lake in New Hampshire. Filter the data `ice_data` by the variable `lake_name` to create a data frame called `sunapee`.
 
 ```{r}
-
+sunapee <- ice |>
+  filter(lake_name == 'Sunapee') |>
+  mutate(ice_off_doy = as.numeric(ice_off_doy))
 ```
 
 You will be using the `sunapee` data for the rest of the module until Question 11
@@ -63,6 +65,10 @@ Be sure that the title, x-axis, and y-axis labels are clearly labeled.
 
 ```{r}
 
+ggplot(sunapee, aes(x=year, y=ice_off_doy)) +
+  geom_point() +
+  geom_line() +
+  labs(title='Lake Sunapee Ice Off Day Over Time', x='Year', y='Ice Off Day')
 ```
 
 # How does ice cover change over time at Lake Sunapee?
@@ -74,19 +80,21 @@ We want to model how the ice-off date changes over time. Our approach in this mo
 What do you expect the sign (plus, minus, or no change) to be for the slope of the relationship? Why?
 
 **Answer 2:**
+Answer: I expect to see a negative relationship between Year and Ice Off Day because the average Ice Off Day of each year seems to decrease as the year increases. 
 
 Use the `lm` function to predict `ice_off_doy` as a function (`~`) of the year for the data.frame called `sunapee`. You can learn more about the `lm` function [here](https://www.datacamp.com/tutorial/linear-regression-R)
 
 Create an object called `fit` that contains the results of the linear model.
 
 ```{r}
-
+fit <- lm(ice_off_doy ~ year, data=sunapee)
+fit
 ```
 
 Then, use the function `summary` to explore the result of the `lm` function.
 
 ```{r}
-
+summary(fit)
 ```
 
 The results of your linear model are in an object named `fit`, so you can find the regression coefficients at `fit$coefficients[1]` (the intercept) and `fit$coefficients[2]` (the slope). Confirm that `fit$coefficients[1]` and `fit$coefficients[2]` match the values expected from the summary command you ran above.
@@ -101,6 +109,8 @@ fit$coefficients[2]
 What is the direction of the slope? How does this match your expectations from Question 2?
 
 **Answer 3:**
+We have a slope of -0.106 which is negative exactly like we expected. The slope is much more gradual than I expected. 
+
 
 # Is our model any good?
 
@@ -113,6 +123,13 @@ First, it is important to understand how much variation is explained by the mode
 What is the R2 for the regression? Based on the R2, is `year` and `ice_off_doy` strongly related?
 
 **Answer 4:**
+
+```{r}
+summary(fit)$r.squared
+```
+
+R2 is 0.205. Which means the year accounts for 20.5% of the variation in Ice Off Day. This means there is a relationship, but the relationship is not very strong. 
+
 
 ## Residuals normally distributed
 
