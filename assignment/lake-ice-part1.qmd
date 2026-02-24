@@ -1,6 +1,6 @@
 ---
 title: "Lake Ice Phenology: Part 1"
-author: 'Jackson'
+author: 'Jackson Bauer'
 format:
   html:
     embed-resources: true
@@ -68,7 +68,7 @@ Be sure that the title, x-axis, and y-axis labels are clearly labeled.
 ggplot(sunapee, aes(x=year, y=ice_off_doy)) +
   geom_point() +
   geom_line() +
-  labs(title='Lake Sunapee Ice Off Day Over Time', x='Year', y='Ice Off Day')
+  labs(title='Lake Sunapee Ice Off Day Over Time', x='Year', y='Day Of Year')
 ```
 
 # How does ice cover change over time at Lake Sunapee?
@@ -161,7 +161,7 @@ Use the [`add_predictions()`](https://modelr.tidyverse.org/reference/add_predict
 **Answer 5:**
 
 ```{r}
-#library(modelr)
+library(modelr)
 
 sunapee <- sunapee |>
   add_predictions(fit) |>
@@ -179,10 +179,11 @@ Show Histogram and answer the following question: do the residuals meet the assu
 
 ```{r}
 ggplot(sunapee, aes(x=resid)) +
-  geom_histogram(bins = 10)
+  geom_histogram(bins = 10) +
+  labs(x='Residuals',y='Count', title='Distribution of Residuals')
 ```
 
-The residuals do not meet the assumptions of linear regression. They have a center around zero, but are skewed to the left. 
+The residuals do not meet the assumptions of linear regression. They have a center around zero, but are skewed to the left, meaning the residuals do not follow a normal distribution. 
 
 
 
@@ -225,7 +226,7 @@ How comfortable are you proceeding with using this linear model for additional a
 
 **Answer 9:**
 
-With alpha=0.05, our p-value of 2.5e-9 is statistically significant. So we are certain this relationship does exist, however the R squared value of 0.205 means only 20.5% of the variation in the ice off day can be explained by the year. This means there are more unknown variables causing the other 79.5% of variation in ice off day. In ecology, a low R squared is always expected because the Earth is a very complex system that we can't fully model so I am comfortable using this model for additional analysis as long as the limitations are understood. 
+With alpha = 0.05, our p-value of 2.5e-9 is statistically significant. So we are certain this relationship does exist, however the R squared value of 0.205 means only 20.5% of the variation in the ice off day can be explained by the year. This means there are more unknown variables causing the other 79.5% of variation in ice off day. In ecology, a low R squared is always expected because the Earth is a very complex system that we can't fully model so I am comfortable using this model for additional analysis as long as the limitations are understood. 
 
 
 
@@ -238,7 +239,7 @@ ggplot(sunapee, aes(x=year, y=ice_off_doy)) +
   geom_point() +
   geom_line() +
   geom_abline(intercept = fit$coefficients[1], slope = fit$coefficients[2]) +
-  labs(title='Lake Sunapee Ice Off Day Over Time', x='Year', y='Ice Off Day')
+  labs(title='Lake Sunapee Ice Off Day Over Time', x='Year', y='Day of Year')
 
 ```
 
@@ -254,8 +255,21 @@ The goal of this question is to make a forecast of the future ice-off day (with 
 **Answer 11:**
 
 ```{r}
+pred2040 <- fit$coefficients[1] + 2040 * fit$coefficients[2]
 
+lower <- pred2040 + quantile(sunapee$resid, 0.05)
+upper <- pred2040 + quantile(sunapee$resid, 0.95)
+
+lower
+upper
+pred2040
+upper - lower
 ```
+The predicted ice off day for 2040 is 102.6. We are 90% confident that the ice off day will be between days 83.2 and 116.8. 
+
+The confidence interval is 33.6 days wide. 
+
+
 
 # Is the ice-off day of the year changing more quickly in more recent years at Lake Sunapee?
 
@@ -268,6 +282,34 @@ Use the skills developed above to evaluate the question "Is the ice-off day of y
 **Answer 12:**
 
 Use a mix of code, figures, and text to present your analysis.  If you want to compare slopes, be sure they are on the same plot.
+
+```{r}
+
+sunapee <- sunapee |>
+  mutate(era = ifelse(year >= 1970,"Later (1970 - Present)", "Early (1869-1969)"))
+
+fit_early <- lm(ice_off_doy ~ year, data = sunapee |> filter(era == "Early (1869-1969)"))
+fit_later <- lm(ice_off_doy ~ year, data = sunapee |> filter(era != "Early (1869-1969)"))
+
+summary(fit_early)
+summary(fit_later)
+
+ggplot(sunapee, aes(x = year, y = ice_off_doy)) +
+  geom_line() +
+  facet_wrap(~era, scales = "free_x") +
+  geom_abline(intercept = fit_early$coefficients[1], slope = fit_early$coefficients[2], color = 'blue') +
+  geom_abline(intercept = fit_later$coefficients[1], slope = fit_later$coefficients[2], color = 'red') +
+  labs(x = "Year", y = "Ice Off Day", title='Ice Off Day By Year') 
+
+fit_together <- lm(ice_off_doy ~ year + era + year:era, data = sunapee)
+summary(fit_together)
+
+fit_early$coefficients[2]
+fit_later$coefficients[2]
+
+```
+I am confident that the ice off day is changing more quickly in recent years. When we plot the two time periods together we see that 1970-present has a much steeper negative slope than 1869-1969. The early period has a slope of -0.110 while the later period has a slope of -0.30. With a p-value of 0.023 the additional change in slope for the later period is statistically significant. 
+
 
 # Rendering and committing
 
